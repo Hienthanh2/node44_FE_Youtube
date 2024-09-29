@@ -9,7 +9,7 @@ const options = {
   headers: {
     "X-RapidAPI-Key": process.env.REACT_APP_RAPID_API_KEY,
     "X-RapidAPI-Host": "youtube-v31.p.rapidapi.com",
-    // 'token': localStorage.getItem("LOGIN_USER")
+    token: localStorage.getItem("access_token"),
   },
 };
 
@@ -26,7 +26,10 @@ export const getListVideos = async () => {
 };
 
 export const getListVideoTypes = async () => {
-  const { data } = await axios.get(`${BASE_URL}/videos/get-video-types`);
+  const { data } = await axios.get(
+    `${BASE_URL}/videos/get-video-types`,
+    options
+  );
 
   return data;
 };
@@ -41,6 +44,18 @@ export const getListVideoByTypeId = async (typeId) => {
 
 export const registerAccount = async (payload) => {
   const { data } = await axios.post(`${BASE_URL}/auth/register`, payload);
+
+  return data;
+};
+
+export const loginAPI = async (payload) => {
+  const { data } = await axios.post(`${BASE_URL}/auth/login`, payload);
+
+  return data;
+};
+
+export const loginFacebookAPI = async (newUser) => {
+  const { data } = await axios.post(`${BASE_URL}/auth/login-face`, newUser);
 
   return data;
 };
