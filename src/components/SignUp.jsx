@@ -5,10 +5,13 @@ import { Box, CardMedia } from "@mui/material";
 import { Videos, ChannelCard } from ".";
 import { registerAccount } from "../utils/fetchFromAPI";
 import { toast } from "react-toastify";
+import QRCode from "qrcode";
 
 const SignUp = () => {
   const [channelDetail, setChannelDetail] = useState();
   const [videos, setVideos] = useState(null);
+  const [isQrScan, setIsQrScan] = useState(false);
+  const [qrCode, setQrCode] = useState(null);
 
   const { id } = useParams();
   const navigate = useNavigate();
@@ -23,12 +26,27 @@ const SignUp = () => {
     };
 
     registerAccount(payload)
-      .then((data) => {
-        console.log(data);
-        toast.success(data.message);
-        navigate("/login");
+      .then((result) => {
+        const secret = result.data.secret;
+
+        // issuer=node44 - dat ten khi tao otp moi then google authentication
+        const otpauth = `otpauth://totp/${payload.email}?secret=${secret}&issuer=node44_thanhhien_youtube`;
+        QRCode.toDataURL(otpauth)
+          .then((qrCodeUrl) => {
+            setQrCode(qrCodeUrl);
+            toast.success(result.message);
+          })
+          .catch();
+
+        console.log(result);
+        // toast.success(result.message);
+        // navigate("/login");
       })
       .catch((error) => toast.error(error.response.data.message));
+  };
+
+  const handleQrScanConfirmation = () => {
+    setIsQrScan(true);
   };
 
   return (
@@ -71,6 +89,21 @@ const SignUp = () => {
           </div>
         </form>
       </div>
+      {/* Hiển thị mã QR nếu có */}
+      {qrCode && (
+        <div className="text-center mt-4">
+          <h4>Scan the QR Code with Google Authenticator</h4>
+          <img src={qrCode} alt="QR Code" />
+          {/* <p>Secret: {secret}</p> Có thể hiển thị secret để sao lưu */}
+          <button
+            onClick={handleQrScanConfirmation}
+            type="button"
+            className="btn btn-success mt-3"
+          >
+            I've Scanned the QR Code
+          </button>
+        </div>
+      )}
     </div>
   );
 };
